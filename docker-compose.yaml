@@ -1,0 +1,30 @@
+volumes:
+  db-data:
+
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development
+    depends_on:
+      - postgres
+    ports:
+      - '3000:3000'
+    command: npm run start:dev
+    volumes:
+      - .:/usr/src/app
+
+  postgres:
+    container_name: postgres
+    image: 'postgres'
+    restart: always
+    environment:
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'root'
+      POSTGRES_DB: 'test'
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
