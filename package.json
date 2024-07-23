@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "infra:up": "docker compose up -d --build",
     "infra:down": "docker compose down",
-    "infra:watch:api": "docker compose logs -df api",
+    "infra:watch:api": "docker compose logs -f api",
     "migrate:create": "docker exec -it api /bin/sh -c \"npx typeorm-ts-node-commonjs migration:generate -d ./src/config/database.config.ts ./src/migrations/$npm_config_name\"",
     "migrate:up": "docker exec -it api /bin/sh -c \"npx typeorm-ts-node-commonjs migration:run -d ./src/config/database.config.ts\"",
     "migrate:down": "docker exec -it api /bin/sh -c \"npx typeorm-ts-node-commonjs migration:revert -d ./src/config/database.config.t\"s"
