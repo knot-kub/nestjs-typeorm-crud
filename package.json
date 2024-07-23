@@ -31,6 +31,8 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^10.0.2",
+    "@types/lodash": "^4.17.7",
+    "lodash": "^4.17.21",
     "pg": "^8.12.0",
     "postgres": "^3.4.4",
     "reflect-metadata": "^0.2.0",
