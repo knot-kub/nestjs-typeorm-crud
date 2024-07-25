@@ -2,13 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 
 @Entity('test')
 export class Test {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   public uuid: string
 
   @Column('varchar')
@@ -27,5 +27,5 @@ export class Test {
   public updatedAt: Date
 
   @CreateDateColumn()
-  public createDate: Date
+  public createdAt: Date
 }

@@ -1,5 +1,4 @@
 import {
-  Controller,
   Delete,
   Get,
   HttpException,
@@ -22,6 +21,7 @@ import { assign, pick } from 'lodash'
 
 export interface CrudControllerOptions<T> {
   searchableFields: (keyof T)[]
+  filterableFields: (keyof T)[]
   distinctableFields: (keyof T)[]
   preSave: ((
     request: Request,
@@ -52,14 +52,27 @@ export interface CrudControllerOptions<T> {
   ) => Promise<void>)[]
 }
 
-@Controller()
 export class CrudController<T> {
+  protected options: Partial<CrudControllerOptions<T>>
+
   constructor(
     private readonly cnstr: new () => T,
     protected readonly resourceKey: keyof T,
-    protected readonly options: CrudControllerOptions<T>,
     protected readonly repository: Repository<T>,
-  ) {}
+    options: Partial<CrudControllerOptions<T>>,
+  ) {
+    this.options = {
+      searchableFields: [],
+      filterableFields: [],
+      distinctableFields: [],
+      preSave: [],
+      postSave: [],
+      afterLoad: [],
+      preDelete: [],
+      postDelete: [],
+      ...options,
+    }
+  }
 
   @Post()
   public async createOne(@Req() request: Request): Promise<T> {
@@ -176,7 +189,7 @@ export class CrudController<T> {
           await executor(request, em, entity)
         }
 
-        await em.delete(this.cnstr, entity)
+        await em.delete(this.cnstr, { [this.resourceKey]: id })
 
         for (const executor of this.options.postDelete) {
           await executor(request, em, entity)
@@ -213,34 +226,30 @@ export class CrudController<T> {
     const limit = (request.query['pageSize'] || 20) as number
     const offset = (((request.query.page || 1) as number) - 1) * limit
 
-    const where = {}
-
     const em: EntityManager = this.repository.manager
 
+    const alias = 'r'
     const query = em
-      .createQueryBuilder(this.cnstr, 'r')
-      .where('1 == 1')
+      .createQueryBuilder(this.cnstr, alias)
       .limit(limit)
       .offset(offset)
 
     // Search string in searchable fields
-    const search = request.query.search
+    const search = request.query.search as string
     if (search) {
-      query.andWhere((qb: SelectQueryBuilder<T>) => {
+      query.andWhere((qb: SelectQueryBuilder<T>): string => {
+        const conditions = []
         for (const searchableField of this.options.searchableFields) {
-          qb.orWhere(
-            `LOWER(${String(searchableField)}) like %LOWER(${search})%`,
-            {
-              search,
-            },
+          conditions.push(
+            `LOWER("${alias}"."${String(searchableField)}") like '%${search.toLowerCase()}%'`,
           )
         }
-        return qb
+        return conditions.join(' OR ')
       })
     }
 
     // Filter by searchable fields
-    const filter = pick(request.query, this.options.searchableFields) as Record<
+    const filter = pick(request.query, this.options.filterableFields) as Record<
       string,
       string
     >
@@ -251,9 +260,9 @@ export class CrudController<T> {
     // Order items
     const order = request.query.order
     if (order) {
-      const [column, d] = (order as string).split('+')
+      const [column, d] = (order as string).split(' ')
       const direction: 'ASC' | 'DESC' = (
-        ['ASC', 'DESC'].includes(d.toUpperCase()) ? d.toUpperCase() : 'ASC'
+        ['ASC', 'DESC'].includes(d?.toUpperCase()) ? d.toUpperCase() : 'ASC'
       ) as 'ASC' | 'DESC'
       query.orderBy({ [column]: direction })
     }

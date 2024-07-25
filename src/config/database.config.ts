@@ -10,4 +10,5 @@ export const database: DataSource = new DataSource({
   synchronize: false,
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*'],
+  logging: true,
 })

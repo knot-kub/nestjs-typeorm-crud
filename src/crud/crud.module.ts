@@ -1,4 +1,8 @@
 import { Module } from '@nestjs/common'
+import { CrudController } from './crud.controller'
 
-@Module({})
+@Module({
+  providers: [CrudController],
+  exports: [CrudController],
+})
 export class CrudModule {}
