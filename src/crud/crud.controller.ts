@@ -23,6 +23,7 @@ export interface CrudControllerOptions<T> {
   searchableFields: (keyof T)[]
   filterableFields: (keyof T)[]
   distinctableFields: (keyof T)[]
+  forAllResources: (request: Request) => Partial<{ [key in keyof T]: any }>
   preSave: ((
     request: Request,
     em: EntityManager,
@@ -65,6 +66,7 @@ export class CrudController<T> {
       searchableFields: [],
       filterableFields: [],
       distinctableFields: [],
+      forAllResources: () => ({}),
       preSave: [],
       postSave: [],
       afterLoad: [],
@@ -117,6 +119,7 @@ export class CrudController<T> {
 
     const where: FindOptionsWhere<T> = {
       [this.resourceKey]: id,
+      ...this.options.forAllResources(request),
     } as FindOptionsWhere<T>
 
     let entity: T = null
@@ -214,6 +217,7 @@ export class CrudController<T> {
       .createQueryBuilder(this.cnstr, 'r')
       .select(fieldName)
       .distinct()
+      .where(this.options.forAllResources(request))
       .execute()
 
     return response.map((v) => v[fieldName])
@@ -231,6 +235,7 @@ export class CrudController<T> {
     const alias = 'r'
     const query = em
       .createQueryBuilder(this.cnstr, alias)
+      .where(this.options.forAllResources(request))
       .limit(limit)
       .offset(offset)
 
