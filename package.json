@@ -1,10 +1,9 @@
 {
-  "name": "nestjs-typeorm-crud",
+  "name": "sntc",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
+  "description": "Generic crud controller",
+  "author": "Swiss L.",
+  "license": "ISC",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
