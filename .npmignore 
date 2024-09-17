@@ -1,0 +1,12 @@
+.vscode/*
+/node_modules
+/src
+/test
+Dockerfile
+docker-compose.yaml
+tsconfig.build.json
+tsconfig.json
+package.json
+package-lock.json
+.eslintrc.js
+nest-cli.json
